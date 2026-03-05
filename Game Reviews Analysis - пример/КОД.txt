@@ -1,0 +1,622 @@
+# ЯЧЕЙКА 1: ИМПОРТЫ И ЗАГРУЗКА
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import warnings
+warnings.filterwarnings('ignore')
+
+# Настройка стиля для графиков
+plt.style.use('seaborn-v0_8-darkgrid')
+sns.set_palette("viridis")
+
+print("✅ Библиотеки загружены")
+
+# Загружаем данные с полным путём
+file_path = r'C:\Users\User\Documents\8) Аналитика Данных\game-reviews-analysis\data\game_reviews.csv'
+df = pd.read_csv(file_path)
+
+# Проверяем, что загрузилось
+print(f"\n✅ Данные загружены: {df.shape[0]} строк, {df.shape[1]} колонок")
+print("\n📋 Первые 5 строк:")
+print(df.head())
+
+print("\n📋 Информация о данных:")
+print(df.info())
+
+print("\n📊 Статистика числовых колонок:")
+print(df.describe())
+
+✅ Библиотеки загружены
+
+✅ Данные загружены: 10000 строк, 7 колонок
+
+📋 Первые 5 строк:
+              app                              reviewId  \
+0  Subway Surfers  6f199a8f-c0eb-4d94-b215-6c9f3a18432b   
+1  Subway Surfers  f07e49cf-7cec-419f-baf8-203fca88e768   
+2  Subway Surfers  86f62464-5f24-4bd6-88be-481a0db1c58a   
+3  Subway Surfers  35e39694-f88f-46bd-9141-bace4768f594   
+4  Subway Surfers  305f918d-acec-42f9-b633-ca72b1bbcbf3   
+
+                                             content  score  thumbsUpCount  \
+0                          love this game since 2014      5              0   
+1                                          So good!!      5              0   
+2  THIS GAME MAKES MY CHILDHOOD I ALWAYS LOVE THI...      5              0   
+3  Very good updates 😁, keep storming the leaderb...      5              0   
+4                                      It's been fun      5              0   
+
+                  date appVersion  
+0  2026-02-17 11:29:44     3.58.5  
+1  2026-02-17 11:26:59     3.59.0  
+2  2026-02-17 11:16:27        NaN  
+3  2026-02-17 11:14:48     3.58.5  
+4  2026-02-17 11:04:56     3.59.0  
+
+📋 Информация о данных:
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 10000 entries, 0 to 9999
+Data columns (total 7 columns):
+ #   Column         Non-Null Count  Dtype 
+---  ------         --------------  ----- 
+ 0   app            10000 non-null  object
+ 1   reviewId       10000 non-null  object
+ 2   content        10000 non-null  object
+ 3   score          10000 non-null  int64 
+ 4   thumbsUpCount  10000 non-null  int64 
+ 5   date           10000 non-null  object
+ 6   appVersion     7387 non-null   object
+dtypes: int64(2), object(5)
+memory usage: 547.0+ KB
+None
+
+📊 Статистика числовых колонок:
+              score  thumbsUpCount
+count  10000.000000   10000.000000
+mean       4.432500       2.694800
+std        1.225559     121.076974
+min        1.000000       0.000000
+25%        5.000000       0.000000
+50%        5.000000       0.000000
+75%        5.000000       0.000000
+max        5.000000   11388.000000
+
+# ЯЧЕЙКА 2: ЗНАКОМСТВО С ИГРАМИ
+
+# Список всех игр в датасете
+games = df['app'].unique()
+print(f"🎮 Игры в датасете: {', '.join(games)}")
+
+# Количество отзывов на каждую игру
+reviews_per_game = df['app'].value_counts()
+print("\n📊 Количество отзывов по играм:")
+print(reviews_per_game)
+
+# Средний рейтинг по играм
+avg_rating = df.groupby('app')['score'].mean().sort_values(ascending=False)
+print("\n⭐ Средний рейтинг по играм (от 1 до 5):")
+print(avg_rating.round(2))
+
+# Медианный рейтинг (устойчив к выбросам)
+median_rating = df.groupby('app')['score'].median()
+print("\n📏 Медианный рейтинг по играм:")
+print(median_rating)
+
+🎮 Игры в датасете: Subway Surfers, Candy Crush Saga, Clash of Clans, PUBG Mobile
+
+📊 Количество отзывов по играм:
+app
+Subway Surfers      2500
+Candy Crush Saga    2500
+Clash of Clans      2500
+PUBG Mobile         2500
+Name: count, dtype: int64
+
+⭐ Средний рейтинг по играм (от 1 до 5):
+app
+Subway Surfers      4.57
+Clash of Clans      4.48
+Candy Crush Saga    4.46
+PUBG Mobile         4.22
+Name: score, dtype: float64
+
+📏 Медианный рейтинг по играм:
+app
+Candy Crush Saga    5.0
+Clash of Clans      5.0
+PUBG Mobile         5.0
+Subway Surfers      5.0
+Name: score, dtype: float64
+
+# ЯЧЕЙКА 3: ВИЗУАЛИЗАЦИЯ ОСНОВНЫХ МЕТРИК
+
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+# График 1: Количество отзывов по играм
+reviews_per_game.plot(kind='bar', ax=axes[0,0], color='skyblue', edgecolor='black')
+axes[0,0].set_title('Количество отзывов по играм', fontsize=12, fontweight='bold')
+axes[0,0].set_xlabel('Игра')
+axes[0,0].set_ylabel('Количество отзывов')
+axes[0,0].tick_params(axis='x', rotation=15)
+
+# График 2: Средний рейтинг по играм
+avg_rating.plot(kind='bar', ax=axes[0,1], color='lightcoral', edgecolor='black')
+axes[0,1].set_title('Средний рейтинг по играм', fontsize=12, fontweight='bold')
+axes[0,1].set_xlabel('Игра')
+axes[0,1].set_ylabel('Средний рейтинг (1-5)')
+axes[0,1].set_ylim(0, 5)
+axes[0,1].tick_params(axis='x', rotation=15)
+
+# График 3: Распределение всех оценок
+axes[1,0].hist(df['score'], bins=5, edgecolor='black', alpha=0.7, color='purple')
+axes[1,0].set_title('Распределение всех оценок', fontsize=12, fontweight='bold')
+axes[1,0].set_xlabel('Оценка (звёзды)')
+axes[1,0].set_ylabel('Количество отзывов')
+axes[1,0].set_xticks([1, 2, 3, 4, 5])
+
+# График 4: Сумма лайков по играм
+likes_by_game = df.groupby('app')['thumbsUpCount'].sum().sort_values(ascending=False)
+likes_by_game.plot(kind='bar', ax=axes[1,1], color='gold', edgecolor='black')
+axes[1,1].set_title('Сумма лайков по играм', fontsize=12, fontweight='bold')
+axes[1,1].set_xlabel('Игра')
+axes[1,1].set_ylabel('Всего лайков')
+axes[1,1].tick_params(axis='x', rotation=15)
+
+plt.suptitle('🎮 АНАЛИЗ ИГРОВЫХ ОТЗЫВОВ', fontsize=14, fontweight='bold')
+plt.tight_layout()
+plt.show()
+
+[изображение графика АНАЛИЗ ИГРОВЫХ ОТЗЫВОВ]
+
+# ЯЧЕЙКА 4: ПОДГОТОВКА ВРЕМЕННЫХ ДАННЫХ
+
+# Преобразуем колонку с датой в правильный формат
+df['date'] = pd.to_datetime(df['date'])
+
+# Создаём новые признаки из даты
+df['year'] = df['date'].dt.year
+df['month'] = df['date'].dt.month
+df['day'] = df['date'].dt.day
+df['day_of_week'] = df['date'].dt.dayofweek  # 0 = понедельник, 6 = воскресенье
+df['hour'] = df['date'].dt.hour
+
+print("✅ Временные признаки созданы")
+print(f"\n📅 Период данных: с {df['date'].min()} по {df['date'].max()}")
+
+# Считаем активность по часам
+hourly_activity = df['hour'].value_counts().sort_index()
+print("\n⏰ Активность по часам (топ-5):")
+print(hourly_activity.head())
+
+# Считаем активность по дням недели
+weekly_activity = df['day_of_week'].value_counts().sort_index()
+weekday_names = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+print("\n📆 Активность по дням недели:")
+for i, count in weekly_activity.items():
+    print(f"   {weekday_names[i]}: {count} отзывов")
+
+✅ Временные признаки созданы
+
+📅 Период данных: с 2026-01-31 18:25:38 по 2026-02-17 11:31:23
+
+⏰ Активность по часам (топ-5):
+hour
+0    231
+1    270
+2    337
+3    396
+4    400
+Name: count, dtype: int64
+
+📆 Активность по дням недели:
+   Пн: 2038 отзывов
+   Вт: 1480 отзывов
+   Ср: 1013 отзывов
+   Чт: 1029 отзывов
+   Пт: 995 отзывов
+   Сб: 1398 отзывов
+   Вс: 2047 отзывов
+
+# ЯЧЕЙКА 5: ВИЗУАЛИЗАЦИЯ ВРЕМЕННЫХ ПАТТЕРНОВ
+
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+# График 1: Активность по часам
+hourly_activity.plot(kind='bar', ax=axes[0,0], color='teal', edgecolor='black')
+axes[0,0].set_title('Активность по часам', fontsize=12, fontweight='bold')
+axes[0,0].set_xlabel('Час дня')
+axes[0,0].set_ylabel('Количество отзывов')
+
+# График 2: Активность по дням недели
+weekly_activity_with_names = weekly_activity.copy()
+weekly_activity_with_names.index = weekday_names
+weekly_activity_with_names.plot(kind='bar', ax=axes[0,1], color='coral', edgecolor='black')
+axes[0,1].set_title('Активность по дням недели', fontsize=12, fontweight='bold')
+axes[0,1].set_xlabel('День недели')
+axes[0,1].set_ylabel('Количество отзывов')
+
+# График 3: Динамика за последние 30 дней
+daily_activity = df['date'].dt.date.value_counts().sort_index()
+daily_activity.tail(30).plot(kind='line', marker='o', ax=axes[1,0], color='green')
+axes[1,0].set_title('Динамика за последние 30 дней', fontsize=12, fontweight='bold')
+axes[1,0].set_xlabel('Дата')
+axes[1,0].set_ylabel('Количество отзывов')
+axes[1,0].tick_params(axis='x', rotation=45)
+
+# График 4: Средняя оценка по часам
+avg_score_by_hour = df.groupby('hour')['score'].mean()
+avg_score_by_hour.plot(kind='line', marker='o', ax=axes[1,1], color='purple')
+axes[1,1].set_title('Средняя оценка по часам', fontsize=12, fontweight='bold')
+axes[1,1].set_xlabel('Час дня')
+axes[1,1].set_ylabel('Средняя оценка')
+axes[1,1].set_ylim(4, 5)
+axes[1,1].grid(True, alpha=0.3)
+
+plt.suptitle('⏰ ВРЕМЕННОЙ АНАЛИЗ ОТЗЫВОВ', fontsize=14, fontweight='bold')
+plt.tight_layout()
+plt.show()
+
+✅ Временные признаки созданы
+
+📅 Период данных: с 2026-01-31 18:25:38 по 2026-02-17 11:31:23
+
+⏰ Активность по часам (топ-5):
+hour
+0    231
+1    270
+2    337
+3    396
+4    400
+Name: count, dtype: int64
+
+📆 Активность по дням недели:
+   Пн: 2038 отзывов
+   Вт: 1480 отзывов
+   Ср: 1013 отзывов
+   Чт: 1029 отзывов
+   Пт: 995 отзывов
+   Сб: 1398 отзывов
+   Вс: 2047 отзывов
+
+[изображение графика ВРЕМЕННОЙ АНАЛИЗ ОТЗЫВОВ]
+
+# ЯЧЕЙКА 6: ТЕКСТОВЫЙ АНАЛИЗ (ТОНАЛЬНОСТЬ)
+
+print("📝 АНАЛИЗ ТОНАЛЬНОСТИ ОТЗЫВОВ")
+print("="*40)
+
+# Списки слов-маркеров для определения тональности
+positive_words = ['love', 'best', 'awesome', 'great', 'good', 'nice', 'perfect', 'amazing']
+negative_words = ['bad', 'worst', 'awful', 'terrible', 'boring', 'hate', 'crap', 'bug']
+
+# Функция для определения тональности
+def get_sentiment(text):
+    """Определяет тональность отзыва (positive/negative/neutral)"""
+    text = str(text).lower()
+    pos_count = sum(word in text for word in positive_words)
+    neg_count = sum(word in text for word in negative_words)
+    
+    if pos_count > neg_count:
+        return 'positive'
+    elif neg_count > pos_count:
+        return 'negative'
+    else:
+        return 'neutral'
+
+# Применяем функцию ко всем отзывам
+df['sentiment'] = df['content'].apply(get_sentiment)
+
+# Считаем распределение тональности
+sentiment_counts = df['sentiment'].value_counts()
+print("\n🎭 Распределение тональности по всем отзывам:")
+print(sentiment_counts)
+print(f"\nПроценты:")
+print(f"  Позитивные: {sentiment_counts.get('positive', 0)/len(df)*100:.1f}%")
+print(f"  Негативные: {sentiment_counts.get('negative', 0)/len(df)*100:.1f}%")
+print(f"  Нейтральные: {sentiment_counts.get('neutral', 0)/len(df)*100:.1f}%")
+
+# Тональность по играм
+sentiment_by_game = df.groupby('app')['sentiment'].value_counts().unstack().fillna(0)
+print("\n📊 Тональность по играм:")
+print(sentiment_by_game)
+
+# Визуализация
+sentiment_by_game.plot(kind='bar', stacked=True, figsize=(10,5), 
+                       color=['#4ECDC4', '#FF6B6B', '#95A5A6'])
+plt.title('Тональность отзывов по играм', fontsize=14, fontweight='bold')
+plt.xlabel('Игра')
+plt.ylabel('Количество отзывов')
+plt.legend(title='Тональность')
+plt.xticks(rotation=15)
+plt.tight_layout()
+plt.show()
+
+📝 АНАЛИЗ ТОНАЛЬНОСТИ ОТЗЫВОВ
+========================================
+
+🎭 Распределение тональности по всем отзывам:
+sentiment
+positive    5504
+neutral     4258
+negative     238
+Name: count, dtype: int64
+
+Проценты:
+  Позитивные: 55.0%
+  Негативные: 2.4%
+  Нейтральные: 42.6%
+
+📊 Тональность по играм:
+sentiment         negative  neutral  positive
+app                                          
+Candy Crush Saga        42     1121      1337
+Clash of Clans          49      986      1465
+PUBG Mobile             97     1128      1275
+Subway Surfers          50     1023      1427
+
+[изображение графика ТОНАЛЬНОСТЬ ОТЗЫВОВ ПО ИГРАМ]
+
+
+# ЯЧЕЙКА 7: БИЗНЕС-ВЫВОДЫ
+
+print("🎯 БИЗНЕС-ВЫВОДЫ")
+print("="*60)
+
+# Определяем самый активный день
+most_active_day_index = int(weekly_activity.idxmax())
+most_active_day_name = weekday_names[most_active_day_index]
+
+print(f"""
+1. 📊 ОБЩАЯ КАРТИНА:
+   - Всего отзывов: {len(df):,}
+   - Средняя оценка: {df['score'].mean():.2f}/5
+   - Медианная оценка: {df['score'].median()}/5
+   - Доля пятёрок: {(df['score'] == 5).mean() * 100:.1f}%
+
+2. 🎮 ПО ИГРАМ:
+   - Самая популярная по отзывам: {reviews_per_game.index[0]} ({reviews_per_game.values[0]} отзывов)
+   - Самый высокий средний рейтинг: {avg_rating.index[0]} ({avg_rating.values[0]:.2f})
+   - Самый низкий средний рейтинг: {avg_rating.index[-1]} ({avg_rating.values[-1]:.2f})
+
+3. ⏰ ПО ВРЕМЕНИ:
+   - Пик активности (час): {hourly_activity.idxmax()}:00
+   - Самый активный день недели: {most_active_day_name}
+
+4. 💬 ТОНАЛЬНОСТЬ:
+   - Доля позитивных отзывов: {sentiment_counts.get('positive', 0)/len(df)*100:.1f}%
+   - Доля негативных отзывов: {sentiment_counts.get('negative', 0)/len(df)*100:.1f}%
+""")
+
+print("="*60)
+print("✅ ПРОЕКТ ЗАВЕРШЁН")
+
+🎯 БИЗНЕС-ВЫВОДЫ
+============================================================
+
+1. 📊 ОБЩАЯ КАРТИНА:
+   - Всего отзывов: 10,000
+   - Средняя оценка: 4.43/5
+   - Медианная оценка: 5.0/5
+   - Доля пятёрок: 77.3%
+
+2. 🎮 ПО ИГРАМ:
+   - Самая популярная по отзывам: Subway Surfers (2500 отзывов)
+   - Самый высокий средний рейтинг: Subway Surfers (4.57)
+   - Самый низкий средний рейтинг: PUBG Mobile (4.22)
+
+3. ⏰ ПО ВРЕМЕНИ:
+   - Пик активности (час): 14:00
+   - Самый активный день недели: Вс
+
+4. 💬 ТОНАЛЬНОСТЬ:
+   - Доля позитивных отзывов: 55.0%
+   - Доля негативных отзывов: 2.4%
+
+============================================================
+✅ ПРОЕКТ ЗАВЕРШЁН
+
+# ЯЧЕЙКА 8: ЭКСПОРТ ВСЕХ РЕЗУЛЬТАТОВ В ТАБЛИЧНЫЙ ФАЙЛ
+
+import pandas as pd
+import os
+from pathlib import Path
+from datetime import datetime
+
+print("📊 ШАГ 8: ФОРМИРОВАНИЕ ИТОГОВОЙ ТАБЛИЦЫ")
+print("="*60)
+
+# 1. Указываем путь к папке портфолио
+portfolio_path = Path(r'C:\Users\User\Documents\8) Аналитика Данных\Портфолио\4) Game Reviews Analysis - пример')
+portfolio_path.mkdir(parents=True, exist_ok=True)
+print(f"✅ Папка портфолио: {portfolio_path}")
+
+# 2. СОЗДАЁМ ИТОГОВУЮ ТАБЛИЦУ С ВСЕМИ МЕТРИКАМИ
+
+# 2.1 Общая статистика
+total_stats = pd.DataFrame({
+    'метрика': ['всего_отзывов', 'средняя_оценка', 'медианная_оценка', 'доля_пятёрок_%'],
+    'значение': [len(df), df['score'].mean(), df['score'].median(), (df['score'] == 5).mean() * 100]
+})
+
+# 2.2 Статистика по играм
+game_stats = pd.DataFrame({
+    'игра': reviews_per_game.index,
+    'количество_отзывов': reviews_per_game.values,
+    'средний_рейтинг': [avg_rating[game] for game in reviews_per_game.index],
+    'медианный_рейтинг': [df[df['app'] == game]['score'].median() for game in reviews_per_game.index],
+    'всего_лайков': [df[df['app'] == game]['thumbsUpCount'].sum() for game in reviews_per_game.index],
+    'позитивных_%': [df[df['app'] == game]['sentiment'].value_counts().get('positive', 0) / len(df[df['app'] == game]) * 100 for game in reviews_per_game.index],
+    'негативных_%': [df[df['app'] == game]['sentiment'].value_counts().get('negative', 0) / len(df[df['app'] == game]) * 100 for game in reviews_per_game.index]
+})
+
+# 2.3 Временная статистика
+time_stats = pd.DataFrame({
+    'час': hourly_activity.index,
+    'количество_отзывов': hourly_activity.values
+})
+
+day_stats = pd.DataFrame({
+    'день_недели': weekday_names,
+    'количество_отзывов': [weekly_activity[i] for i in range(7)]
+})
+
+# 2.4 Тональность по играм (детально)
+sentiment_detailed = sentiment_by_game.reset_index()
+
+# 3. СОХРАНЯЕМ ВСЁ В EXCEL (ОДИН ФАЙЛ, НЕСКОЛЬКО ЛИСТОВ)
+
+excel_path = portfolio_path / 'game_reviews_analysis_full.xlsx'
+with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
+    # Лист 1: Общая статистика
+    total_stats.to_excel(writer, sheet_name='Общая статистика', index=False)
+    
+    # Лист 2: Статистика по играм
+    game_stats.to_excel(writer, sheet_name='Статистика по играм', index=False)
+    
+    # Лист 3: Почасовая активность
+    time_stats.to_excel(writer, sheet_name='Почасовая активность', index=False)
+    
+    # Лист 4: Активность по дням
+    day_stats.to_excel(writer, sheet_name='Активность по дням', index=False)
+    
+    # Лист 5: Тональность детально
+    sentiment_detailed.to_excel(writer, sheet_name='Тональность по играм', index=False)
+    
+    # Лист 6: Сырые данные (первые 1000 строк для примера)
+    df.head(1000).to_excel(writer, sheet_name='Пример данных', index=False)
+
+print(f"\n✅ Excel файл создан: {excel_path}")
+
+# 4. СОХРАНЯЕМ ТАКЖЕ В CSV (ДЛЯ УДОБСТВА)
+
+total_stats.to_csv(portfolio_path / 'total_stats.csv', index=False, encoding='utf-8-sig')
+print(f"✅ total_stats.csv сохранён")
+
+game_stats.to_csv(portfolio_path / 'game_stats.csv', index=False, encoding='utf-8-sig')
+print(f"✅ game_stats.csv сохранён")
+
+time_stats.to_csv(portfolio_path / 'hourly_stats.csv', index=False, encoding='utf-8-sig')
+print(f"✅ hourly_stats.csv сохранён")
+
+day_stats.to_csv(portfolio_path / 'daily_stats.csv', index=False, encoding='utf-8-sig')
+print(f"✅ daily_stats.csv сохранён")
+
+sentiment_detailed.to_csv(portfolio_path / 'sentiment_stats.csv', index=False, encoding='utf-8-sig')
+print(f"✅ sentiment_stats.csv сохранён")
+
+# 5. СОЗДАЁМ README ДЛЯ ПОРТФОЛИО (БЕЗ ЛИШНИХ СИМВОЛОВ)
+
+readme_content = f'''# 🎮 Game Reviews Analysis
+
+**Проект:** Анализ 10 000 отзывов на мобильные игры из Google Play  
+**Дата:** {datetime.now().strftime('%d.%m.%Y')}  
+**Автор:** GLEBowski  
+**Технологии:** Python, Pandas, Matplotlib, Seaborn, Jupyter
+
+## 📊 Содержание проекта
+
+| Файл | Описание |
+|------|----------|
+| game_reviews_analysis_full.xlsx | Полный отчёт с несколькими листами |
+| total_stats.csv | Общая статистика по всем отзывам |
+| game_stats.csv | Детальная статистика по каждой игре |
+| hourly_stats.csv | Распределение отзывов по часам |
+| daily_stats.csv | Распределение отзывов по дням недели |
+| sentiment_stats.csv | Анализ тональности по играм |
+
+## 🎯 Ключевые выводы
+
+1. **Общая картина**
+   - Всего отзывов: {len(df):,}
+   - Средняя оценка: {df['score'].mean():.2f}/5
+   - Медианная оценка: {df['score'].median()}/5
+   - Доля пятёрок: {(df['score'] == 5).mean() * 100:.1f}%
+
+2. **По играм**
+   - Самая популярная: {reviews_per_game.index[0]} ({reviews_per_game.values[0]} отзывов)
+   - Самый высокий рейтинг: {avg_rating.index[0]} ({avg_rating.values[0]:.2f})
+   - Самый низкий рейтинг: {avg_rating.index[-1]} ({avg_rating.values[-1]:.2f})
+
+3. **Временные паттерны**
+   - Пик активности: {hourly_activity.idxmax()}:00
+   - Самый активный день: {weekday_names[int(weekly_activity.idxmax())]}
+
+4. **Тональность**
+   - Позитивных отзывов: {sentiment_counts.get('positive', 0)/len(df)*100:.1f}%
+   - Негативных отзывов: {sentiment_counts.get('negative', 0)/len(df)*100:.1f}%
+
+## 🚀 Как использовать
+
+1. Открыть game_reviews_analysis_full.xlsx в Excel
+2. Или загрузить CSV файлы в любую программу для анализа
+3. Использовать данные для презентаций, отчётов или дальнейшего анализа
+
+## 📁 Структура папки
+
+4) Game Reviews Analysis - пример/
+├── game_reviews_analysis_full.xlsx
+├── total_stats.csv
+├── game_stats.csv
+├── hourly_stats.csv
+├── daily_stats.csv
+├── sentiment_stats.csv
+└── README.md
+'''
+
+with open(portfolio_path / 'README.md', 'w', encoding='utf-8') as f:
+    f.write(readme_content)
+
+print(f"\n✅ README.md создан")
+
+# 6. ФИНАЛЬНАЯ ПРОВЕРКА
+
+print("\n📁 ИТОГОВАЯ СТРУКТУРА ПОРТФОЛИО:")
+print("="*60)
+print(f"📂 {portfolio_path}/")
+print(f"   ├── 📄 game_reviews_analysis_full.xlsx")
+print(f"   ├── 📄 total_stats.csv")
+print(f"   ├── 📄 game_stats.csv")
+print(f"   ├── 📄 hourly_stats.csv")
+print(f"   ├── 📄 daily_stats.csv")
+print(f"   ├── 📄 sentiment_stats.csv")
+print(f"   └── 📄 README.md")
+
+print("\n" + "="*60)
+print("🎉 ПРОЕКТ ПОЛНОСТЬЮ ЗАВЕРШЁН И УПАКОВАН В ПОРТФОЛИО!")
+print("="*60)
+
+📊 ШАГ 8: ФОРМИРОВАНИЕ ИТОГОВОЙ ТАБЛИЦЫ
+============================================================
+✅ Папка портфолио: C:\Users\User\Documents\8) Аналитика Данных\Портфолио\4) Game Reviews Analysis - пример
+
+✅ Excel файл создан: C:\Users\User\Documents\8) Аналитика Данных\Портфолио\4) Game Reviews Analysis - пример\game_reviews_analysis_full.xlsx
+✅ total_stats.csv сохранён
+✅ game_stats.csv сохранён
+✅ hourly_stats.csv сохранён
+✅ daily_stats.csv сохранён
+✅ sentiment_stats.csv сохранён
+
+✅ README.md создан
+
+📁 ИТОГОВАЯ СТРУКТУРА ПОРТФОЛИО:
+============================================================
+📂 C:\Users\User\Documents\8) Аналитика Данных\Портфолио\4) Game Reviews Analysis - пример/
+   ├── 📄 game_reviews_analysis_full.xlsx
+   ├── 📄 total_stats.csv
+   ├── 📄 game_stats.csv
+   ├── 📄 hourly_stats.csv
+   ├── 📄 daily_stats.csv
+   ├── 📄 sentiment_stats.csv
+   └── 📄 README.md
+
+============================================================
+🎉 ПРОЕКТ ПОЛНОСТЬЮ ЗАВЕРШЁН И УПАКОВАН В ПОРТФОЛИО!
+============================================================
+
+
+
+
+
+
+
